@@ -1,0 +1,148 @@
+/* Ochoche Samuel Daniel dvd rental assignment
+Q1:write an SQL query to find the names and emails of all 
+customers who rented a movie in february 2005 and sort the
+result by last name in ascending order */
+SELECT
+    c.last_name,
+	c.first_name,
+	c.email,
+	r.rental_id,
+	r.rental_date
+FROM
+    customer AS c
+INNER JOIN
+    rental AS r
+ON
+    r.customer_id = c.customer_id
+WHERE 
+    rental_date BETWEEN '2005-02-01 00:00:00' AND '2005-02-20 00:00:00'
+ORDER BY
+    c.last_name ASC
+/*Q2 write an sql query to count the number of movies in the 'action'
+genre that were rented more than ten times and display the result in
+descending order */
+
+SELECT
+    c.name AS genre,
+	f.title,
+	COUNT(f.title) AS t_no_of_movies
+FROM
+    category AS c
+INNER JOIN 
+    film_category AS fc
+ON
+    fc.category_id = c.category_id
+INNER JOIN
+     film AS f
+ON
+     f.film_id = fc.film_id
+INNER JOIN
+    inventory AS iv
+ON
+    iv.film_id = f.film_id
+INNER JOIN
+    rental AS r
+ON
+    r.inventory_id = iv.inventory_id
+GROUP BY
+    c.name,
+	f.title
+HAVING
+    c.name = 'Action' AND
+	COUNT(r.rental_id) > 10
+	ORDER BY 
+	COUNT(f.title) DESC
+/*q3 write an sql query to find the names of all customers who rented
+more than 30 movies in total and the total amount they paid for all
+rentals ,sorted by the total amount they paid in descending order */
+
+SELECT
+    c.first_name,
+	c.last_name,
+	r.rental_id,
+    SUM(p.amount) AS total_amount_paid
+FROM
+    customer AS c
+INNER JOIN
+    rental AS r
+ON 
+    r.customer_id = c.customer_id
+INNER JOIN
+    payment AS p
+ON
+    p.customer_id = r.customer_id
+GROUP BY
+    c.first_name,
+	c.last_name,
+	r.rental_id,
+	p.amount
+HAVING
+    r.rental_id >= 30 
+ORDER BY 
+    SUM(p.amount) DESC
+ /*Q4 write an sql query to find the titles of all movies that were
+rented by more than 100 customers,along with the number of customers who r
+rented them,sorted by the number of customers in descending order */ 
+SELECT
+    f.title AS film_title,
+	COUNT(r.customer_id) AS no_of_customer
+FROM
+    rental AS r
+INNER JOIN
+    inventory AS i
+ON
+    i.inventory_id = r.inventory_id
+INNER JOIN
+    film AS f
+ON
+    f.film_id = i.film_id
+GROUP BY
+    f.title,
+	r.customer_id
+HAVING
+    COUNT(r.customer_id) > 100
+ORDER BY
+    r.customer_id DESC
+/* q5-write an sql query to find the movie categories 
+that have the highest and lowest average rental rates in the store,
+and calculate the difference in average rate between these categories */
+
+--Highest average rental rate--
+
+SELECT
+    c.name,
+	AVG(f.rental_rate) AS average_rentalrate
+FROM
+    category AS c
+INNER JOIN
+    film_category AS fc
+ON
+    c.category_id = fc.category_id
+INNER JOIN
+    film AS f
+ON
+    fc.film_id = f.film_id
+GROUP BY
+    c.name
+ORDER BY
+    AVG(f.rental_rate) DESC
+LIMIT 1	
+--lowest average rental rate--
+SELECT
+    c.name,
+	AVG(f.rental_rate) AS average_rentalrate
+FROM
+    category AS c
+INNER JOIN
+    film_category AS fc
+ON
+    c.category_id = fc.category_id
+INNER JOIN
+    film AS f
+ON
+    fc.film_id = f.film_id
+GROUP BY 
+    c.name
+ORDER BY
+    AVG(f.rental_rate) ASC
+LIMIT 1	
